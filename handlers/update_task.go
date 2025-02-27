@@ -19,8 +19,6 @@ func UpdateTask(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 		return
 	}
 
-	defer r.Body.Close()
-
 	// Проверяем обязательное поле ID
 
 	if task.ID == "" {

@@ -36,6 +36,8 @@ func serverStart() {
 		log.Fatal(err)
 	}
 
+	defer db.Close()
+
 	if install {
 		createTableSQL := `CREATE TABLE IF NOT EXISTS scheduler (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -46,6 +48,11 @@ func serverStart() {
         );`
 
 		_, err = db.Exec(createTableSQL)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		_, err = db.Exec("CREATE INDEX ID_Date ON scheduler (date);")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -82,7 +89,7 @@ func serverStart() {
 			http.Error(w, "Error method", http.StatusMethodNotAllowed)
 		}
 	})
-	defer db.Close()
+
 	http.HandleFunc("/api/task/done", func(w http.ResponseWriter, r *http.Request) {
 		handlers.TaskAsDone(w, r, db)
 	})

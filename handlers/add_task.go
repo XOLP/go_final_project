@@ -11,6 +11,8 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+const dateformat = "20060102"
+
 func AddTask(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 
 	var task Task
@@ -19,8 +21,6 @@ func AddTask(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
-	defer r.Body.Close()
 
 	// Проверяем обязательное поле Title
 	if task.Title == "" {
@@ -31,11 +31,11 @@ func AddTask(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 
 	// Проверяем формат даты и преобразуем в формат 20060102
 	if task.Date == "" {
-		task.Date = time.Now().Format("20060102")
+		task.Date = time.Now().Format(dateformat)
 	}
 	date := task.Date
 
-	parsedDate, err := time.Parse("20060102", date)
+	parsedDate, err := time.Parse(dateformat, date)
 	if err != nil {
 		response := ErrorResponse{Error: "Неверный формат даты. Должен быть YYYYMMDD"}
 		createErrorResponse(w, http.StatusBadRequest, response)
@@ -53,7 +53,7 @@ func AddTask(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 			}
 			task.Date = nextDate
 		} else {
-			task.Date = time.Now().Format("20060102")
+			task.Date = time.Now().Format(dateformat)
 		}
 	}
 
